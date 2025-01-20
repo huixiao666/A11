@@ -1,0 +1,3399 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="皮卡商店 - 应用下载平台">
+    <title>皮卡商店</title>
+    <style>
+        :root {
+            --primary-color: #333;
+            --background-color: #f5f5f5;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --text-color: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--background-color);
+            line-height: 1.6;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #fff;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            z-index: 1000;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-bar button:hover {
+            background-color: #0056b3;
+        }
+        
+        
+
+        .nav {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #fff;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+            white-space: nowrap;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .nav a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .app-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .app-item {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .app-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .app-info {
+            flex: 1;
+        }
+
+        .app-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .app-name a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .app-category {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .rating {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .floating-button {
+            position: fixed;
+            right: 1.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: none;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .floating-refresh {
+            composes: floating-button;
+            bottom: 5.5rem;
+        }
+
+        .floating-top {
+            composes: floating-button;
+            bottom: 15rem;
+        }
+
+        .floating-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .app-list {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .app-icon {
+                width: 48px;
+                height: 48px;
+            }
+
+            .app-name {
+                font-size: 1rem;
+            }
+        }
+
+        /* 添加深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #fff;
+                --background-color: #1a1a1a;
+                --shadow-color: rgba(0, 0, 0, 0.3);
+                --text-color: #999;
+            }
+
+            body {
+                color: var(--primary-color);
+            }
+
+            .header,
+            .nav,
+            .app-item {
+                background-color: #2d2d2d;
+            }
+
+            .search-bar input {
+                background-color: #333;
+                color: var(--primary-color);
+                border-color: #444;
+            }
+        }
+        
+        .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background-color: #fff;
+    box-shadow: 2px 0 8px var(--shadow-color);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    z-index: 1001;
+    padding: 1rem 0;
+}
+
+.sidebar.active {
+    transform: translateX(280px);
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem 1rem;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+}
+
+.sidebar-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--primary-color);
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    margin: 0.5rem 0;
+}
+
+.sidebar-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.sidebar-menu a:hover {
+    background-color: #f0f0f0;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .sidebar {
+        background-color: #2d2d2d;
+    }
+    
+    .sidebar-header {
+        border-bottom-color: #444;
+    }
+    
+    .sidebar-menu a:hover {
+        background-color: #3d3d3d;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) {
+    .sidebar-menu a:active {
+        background-color: #f0f0f0;
+    }
+}
+
+/* 修改侧滑菜单按钮样式 */
+.toggle-sidebar {
+    font-size: 2rem; /* 增大字体大小 */
+    padding: 0.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-color);
+    width: 60px; /* 增加按钮宽度 */
+    height: 60px; /* 增加按钮高度 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.toggle-sidebar:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 修改浮动按钮样式 */
+.floating-button {
+    position: fixed;
+    right: 1.5rem;
+    width: 60px; /* 增加按钮宽度 */
+    height: 60px; /* 增加按钮高度 */
+    border-radius: 50%;
+    background-color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem; /* 增大字体大小 */
+}
+
+/* 浮动按钮基础样式 */
+.floating-button {
+    position: fixed;
+    right: 1.5rem;
+    width: 60px; /* 增大按钮尺寸 */
+    height: 60px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem; /* 增大图标尺寸 */
+    z-index: 999;
+}
+
+/* 刷新按钮位置 */
+.floating-refresh {
+    bottom: 6.5rem;
+}
+
+/* 返回顶部按钮位置 */
+.floating-top {
+    bottom: 1.5rem;
+}
+
+/* 按钮悬停效果 */
+.floating-button:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.1);
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .floating-button {
+        background-color: #2d2d2d;
+        color: var(--primary-color);
+    }
+
+    .floating-button:hover {
+        background-color: #3d3d3d;
+    }
+}
+
+/* 移动设备适配 */
+@media (max-width: 768px) {
+    .floating-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        right: 1rem;
+    }
+
+    .floating-refresh {
+        bottom: 5.5rem;
+    }
+
+    .floating-top {
+        bottom: 1rem;
+    }
+}
+
+</style>
+
+<style>
+.card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+    
+    .card {
+    display: block;
+}
+
+    .card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        flex-basis: calc(33.333% - 20px); /* 默认为三列布局 */
+        max-width: calc(33.333% - 20px);
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .card-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: #1a73e8;
+    }
+
+    .card-content {
+        margin-bottom: 10px;
+    }
+
+    .card-info {
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .download-btn {
+        display: inline-block;
+        background: #1a73e8;
+        color: white;
+        padding: 8px 15px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    @media (max-width: 767px) {
+        .card {
+            flex-basis: calc(100% - 20px); /* 小屏幕为单列布局 */
+            max-width: calc(100% - 20px);
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .card {
+            flex-basis: calc(50% - 20px); /* 中等屏幕为两列布局 */
+            max-width: calc(50% - 20px);
+        }
+    }
+
+    @media (min-width: 992px) {
+        .card {
+            flex-basis: calc(25% - 20px); /* 大屏幕为四列布局 */
+            max-width: calc(25% - 20px);
+        }
+        
+        
+    </style>
+    
+    <style>
+    /* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d2d2d; /* 深色背景 */
+        color: #fff; /* 白色文本 */
+    }
+
+    .card-title {
+        color: #1a73e8; /* 保持标题颜色 */
+    }
+
+    .card-info {
+        color: #bbb; /* 更浅的文本颜色 */
+    }
+
+    .download-btn {
+        background: #1a73e8; /* 下载按钮颜色 */
+        color: white; /* 按钮文本颜色 */
+    }
+
+    .download-btn:hover {
+        background: #1a5bb8; /* 按钮悬停效果 */
+    }
+}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="toggle-sidebar" aria-label="菜单" onclick="toggleSidebar()">☰</button>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索应用" aria-label="搜索应用">
+            <button onclick="performSearch()">搜索</button>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <a href="https://huixiao666.github.io/A/">首页</a>
+        <a href="https://huixiao666.github.io/A1/">吃瓜</a>
+        <a href="https://huixiao666.github.io/A3/">车牌</a>
+        <a href="https://huixiao666.github.io/A2/">电脑</a>
+        <a href="https://huixiao666.github.io/A4/">搜图</a>
+        <a href="https://huixiao666.github.io/A6/">更新</a>
+        <a href="https://huixiao666.github.io/A7/">视频</a>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>搜索导航</h2>
+            <button class="sidebar-close" onclick="toggleSidebar()" aria-label="关闭菜单">×</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="https://baidu.com">百度</a></li>
+            <li><a href="https://m.sogou.com/">搜狗</a></li>
+            <li><a href="https://m.so.com/">360</a></li>
+            <li><a href="https://www.google.com">谷歌</a></li>
+            <li><a href="https://www.bing.com">bing</a></li>
+            <li><a href="https://search.yahoo.com/">yahoo</a></li>
+            <li><a href="https://www.ask.com/">ask</a></li>
+            <li><a href="https://duckduckgo.com/">duckduckgo</a></li>
+            <li><a href="https://yandex.com/">俄罗斯</a></li>
+            <li><a href="https://www.cilimiao.cn/">BT磁链</a></li>
+            <li><a href="http://lemonuo.top/">磁力柠檬</a></li>
+            <li><a href="https://theporndude.com/zh/top-porn-tube-sites">免费成人涩情网站</a></li>
+            <li><a href="https://theporndude.com/zh/hentai-streaming-sites">免费动漫涩情网站</a></li>
+            <li><a href="https://www.xbookcn.net/">成人中文免费小说</a></li>
+            <li><a href="http://www.caoliuxs.vip/">成人免费草榴小说</a></li>
+            <li><a href="https://sesebooks.com/">免费成人黄涩小说</a></li>
+            <li><a href="https://www.fanqianglu.com/free/cnnovel">免费成人涩情小说最全</a></li>
+            <li><a href="#">涩情性爱故事网站</a></li>
+        </ul>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        <!-- 侧边栏内容 -->
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="app-list">
+        <article class="app-item">
+            <div class="card-container" id="cardContainer">
+        <!-- 卡片内容 -->
+        <div class="card" id="card1">
+            
+            <div class="card-content">
+                <div class="card-title">ARBB-033</div>
+                <div class="card-info">发行日期: 2016-12-09</div>
+                <div class="card-info">女优: 迹美朱里(迹美しゅり)</div>
+                <div class="card-info">类型: 女高中生,美少女,贫乳,苗条,校服,单体作品,中出,口交,多人运动,颜射,高清</div>
+                <div class="card-info">系列: ＃新宿神待ち家出女子校生</div>
+                <div class="card-info">发行商: ＆RiBbON</div>
+                <div class="card-info">导演: TODO</div>
+                <div class="card-info">标签: 肉便器これくしょん</div>
+                <a href="magnet:?xt=urn:btih:6e91ade3aa86a4ed7e1eeec3be8147c32bc086fa" class="download-btn">下载</a>
+            </div>
+        </div>
+        <!-- SSIS-852 -->
+        <div class="card" id="card2">
+            <div class="card-title">SSIS-852</div>
+            <div class="card-content">
+                <div class="card-info">发行日期: 2023-07-21</div>
+                <div class="card-info">女优: 二阶堂梦 (二階堂夢)</div>
+                <div class="card-info">类型: 中文字幕, 巨乳, 单体作品, 淫乱, 接吻, 骑乘, 潮吹, 出道作, 超薄格, 高清, 独家, 4K</div>
+                <div class="card-info">系列: 専属NO.1 STYLE</div>
+                <div class="card-info">发行商: S1</div>
+                <div class="card-info">导演: 紋℃</div>
+                <div class="card-info">标签: S1 NO.1 STYLE</div>
+                <a href="magnet:?xt=urn:btih:DF7F755C853EAF6564DB34482C4D675F1219343A&size=9111819508&biz=ktr" class="download-btn">下载</a>
+            </div>
+        </div>
+        
+        <div class="card">
+    <div class="card-title">ONEZ-080</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2016-12-16</div>
+        <div class="card-info">番号: ONEZ-080</div>
+        <div class="card-info">标题: 吹奏楽部副部長 なまなかだし10連発 跡美しゅり</div>
+        <div class="card-info">女优: 迹美朱里 (跡美しゅり)</div>
+        <div class="card-info">类型: 校园故事, 女高中生, 美少女, 水手服, 乱交, 单体作品, 中出, 口交, 自慰, 高清</div>
+        <div class="card-info">系列: 吹奏楽部○○ なまなかだし10連発</div>
+        <div class="card-info">发行商: Prestige</div>
+        <div class="card-info">导演: TODO</div>
+        <div class="card-info">标签: ONEZ</div>
+        <a href="magnet:?xt=urn:btih:bb3b16ae81e8d010a124b8919b7f4585932a9650" class="download-btn">下载</a>
+    </div>
+</div>
+
+    
+    <div class="card">
+        <div class="card-title">HOMEV-032</div>
+        <div class="card-content">
+            <div class="card-info">发行日期: 2022-03-25</div>
+            <div class="card-info">番号: HOMEV-032</div>
+            <div class="card-info">标题: めいさちゃん</div>
+            <div class="card-info">类型: 女高中生, 乱伦, 偷拍, 姐妹, 媚药, 高清</div>
+            <div class="card-info">发行商: ホームメイド</div>
+            <div class="card-info">标签: ホームメイド</div>
+            <a href="magnet:?xt=urn:btih:adb6287490511b385314eb1d38e08ed544448113" class="download-btn">下载</a>
+        </div>
+    </div>
+    
+    <div class="card">
+    <div class="card-title">MIAD-922</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2016-06-11</div>
+        <div class="card-info">番号: MIAD-922</div>
+        <div class="card-info">标题: 早漏イクイク女子校生2 跡美しゅり</div>
+        <div class="card-info">女优: 迹美朱里 (跡美しゅり)</div>
+        <div class="card-info">男优: 井口, 泽木和也, 岩泽, 望月</div>
+        <div class="card-info">类型: 女高中生, 美少女, 贫乳, 小只马, 单体作品, 薄格, 高清, 独家</div>
+        <div class="card-info">系列: 早漏イクイク女子校生</div>
+        <div class="card-info">发行商: Moody's</div>
+        <div class="card-info">导演: 金田一小五郎</div>
+        <div class="card-info">标签: MOODYZ ACID</div>
+        <a href="magnet:?xt=urn:btih:60821d58d4b1d0e8456b8db05c8b41963f7db459" class="download-btn">下载</a>
+    </div>
+</div>
+    
+    <div class="card">
+    <div class="card-title">GENT-096</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2016-01-24</div>
+        <div class="card-info">番号: GENT-096</div>
+        <div class="card-info">标题: 最強にロリ可愛い（のに）どえす天使ちゃん！「私、○学生の時からムラムラすると、おやじ捕獲して中出しさせてました」 しゅり</div>
+        <div class="card-info">男优: 杉浦ボッ树</div>
+        <div class="card-info">类型: 美少女, 痴女, 小只马, 中出, 淫语, 高清, 妄想</div>
+        <div class="card-info">发行商: ジェントルマン/妄想族</div>
+        <div class="card-info">标签: ジェントルマン（ジェントルマン/妄想族）</div>
+        <a href="magnet:?xt=urn:btih:013e67170f06bccd3fc9fe331866688349e64ee7" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">MIAE-020</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2017-02-04</div>
+        <div class="card-info">番号: MIAE-020</div>
+        <div class="card-info">标题: DQNJK溜まり場に突然呼びつけられてオモチャにされた僕。 跡美しゅり，かなで自由，朝倉ことみ</div>
+        <div class="card-info">女优: 朝仓琴美 (朝倉ことみ), 迹美朱里 (跡美しゅり), 奏自由 (かなで自由)</div>
+        <div class="card-info">类型: 女高中生, 痴女, 苗条, 颜面骑乘, 薄格, 高清, 独家</div>
+        <div class="card-info">发行商: Moody's</div>
+        <div class="card-info">导演: ドラゴン西川</div>
+        <div class="card-info">标签: MOODYZ ACID</div>
+        <a href="magnet:?xt=urn:btih:734739074a36ddd64e3b6b13c7b25b2d9f514ea5" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">T28-503</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2017-06-23</div>
+        <div class="card-info">番号: T28-503</div>
+        <div class="card-info">标题: ぜんぶ妹のせいだ。～妹は病みカワ少女～</div>
+        <div class="card-info">女优: 佳苗瑠华, 若月玛丽亚, 迹美朱里, 姬川优奈</div>
+        <div class="card-info">类型: 美少女, Lolita, 姐妹, 中出, 3P、4P</div>
+        <div class="card-info">发行商: TMA</div>
+        <a href="magnet:?xt=urn:btih:d7e100ad4e58788360ec39d5bd26f6b76c8cc9e8" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">APKH-004</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2015-11-22</div>
+        <div class="card-info">番号: APKH-004</div>
+        <div class="card-info">标题: 学校の図書館で見かけたおとなしそうな文系女子とホテルでセックスしたら、実はエスちゃんで逆に責められてしまった。 跡美しゅり</div>
+        <div class="card-info">女优: 迹美朱里 (跡美しゅり)</div>
+        <div class="card-info">类型: 女大学生, 苗条, 单体作品, 颜射, 自拍, 高清</div>
+        <div class="card-info">系列: 図書館で見かけたオンナに逆に責められてしまった</div>
+        <div class="card-info">发行商: オーロラプロジェクト・アネックス</div>
+        <div class="card-info">标签: オーロラプロジェクト・アネックス</div>
+        <a href="magnet:?xt=urn:btih:ef7c4e41ceebe78628f4613d8ea5ed8ab99b0940" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">IENFH-20201</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2024-04-29</div>
+        <div class="card-info">番号: IENFH-20201</div>
+        <div class="card-info">标题: 私のオッパイはお兄ちゃんのもの 高橋りほ</div>
+        <div class="card-info">女优: 高桥りほ (高橋りほ)</div>
+        <div class="card-info">类型: 巨乳, 姐妹, 中出, 仅送货, 全高清 (FHD)</div>
+        <div class="card-info">发行商: I ENERGY</div>
+        <div class="card-info">标签: IENFH</div>
+        <a href="magnet:?xt=urn:btih:6F5E25045996F43E0DE7278831274EF5A619D032" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">IBW-385</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2013-07-19</div>
+        <div class="card-info">番号: IBW-385</div>
+        <div class="card-info">标题: 妹にこっそり媚薬を●ませてみたら発情してSEXを求めてきた</div>
+        <div class="card-info">类型: 乱伦, 姐妹, 媚药, 高清</div>
+        <div class="card-info">发行商: I.B.WORKS</div>
+        <div class="card-info">标签: I.B.WORKS</div>
+        <a href="magnet:?xt=urn:btih:803d59452204389092212e0bd80e2ae8e2c40333" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">IBW-928</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2023-08-24</div>
+        <div class="card-info">番号: IBW-928</div>
+        <div class="card-info">标题: 父親に●●れ続ける娘の近親相●映像 希咲那奈</div>
+        <div class="card-info">女优: 希咲那奈</div>
+        <div class="card-info">类型: 制服, 单体作品, 中出</div>
+        <div class="card-info">发行商: I.B.WORKS</div>
+        <div class="card-info">标签: I.B.WORKS</div>
+        <a href="magnet:?xt=urn:btih:3066FCCC25B80ED04B7118FEB1DA618B283D7DC9" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">HEYZO-2833</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2022-07-22</div>
+        <div class="card-info">番号: HEYZO-2833</div>
+        <div class="card-info">标题: ゆずの琴美【ゆずのことみ】 欲求不満な亲友のカノジョを寝取ってヤりました！ ！</div>
+        <div class="card-info">标签: 饼,女牛仔,手淫,舔阴,背部,外遇/作弊,棉花糖的胸部,最好的朋友女朋友</div>
+        <a href="magnet:?xt=urn:btih:CD32DBE8F3F7291AD332C982CA78EADBB4A87E9B" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">FC2-PPV-3090722</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2022-09-14</div>
+        <div class="card-info">番号: FC2-PPV-3090722</div>
+        <div class="card-info">标题: 【传奇的开始..】2022年的极品美女终于登场了。一个纯白色的秘密文件夹，包含你生命中最美丽的时刻。小樱18岁</div>
+        <a href="magnet:?xt=urn:btih:728b38e41cfba6ee9bf223eaa5a196c0d8b1658b&dn=Www.CiLiPa.Me" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">SONE-166</div>
+    <div class="card-content">
+        <div class="card-info">品番: sone00165</div>
+        <div class="card-info">DVD ID: SONE-165</div>
+        <div class="card-info">発売日: 2024-04-05</div>
+        <div class="card-info">収録時間: 122分</div>
+        <div class="card-info">監督: 豆沢豆太郎</div>
+        <div class="card-info">シリーズ: 女子社員と絶倫上司が出張先の相部屋ホテルで…</div>
+        <div class="card-info">メーカー: エスワン ナンバーワンスタイル</div>
+        <div class="card-info">レーベル: S1 NO.1 STYLE</div>
+        <div class="card-info">ジャンル: ハイビジョン4K辱め単体作品淫乱・ハード系ドラマOL美乳</div>
+        <div class="card-info">出演者: 村上悠華</div>
+        <!-- 下载链接为空，请提供有效的magnet链接或其他下载链接 -->
+        <a href="magnet:?xt=urn:btih:f1c41977b8691fa06781e3157d424be06964bacc&dn=SONE-166.%5B4K%5D%40R&xl=24189627452&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://tracker.openbittorrent.com:80/announce&tr=http://tracker.opentrackr.org:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.opentrackr.org:1337&tr=http://t.nyaatracker.com:80/announce&tr=udp://ipv4.tracker.harry.lu:80/announce&tr=udp://retracker.lanta-net.ru:2710/announce&tr=http://tracker.videodrugproject.com:80/announce&tr=http://share.camoe.cn:8080/announce&tr=udp://open.stealth.si:80/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://tracker.torrent.eu.org:451/announce" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">SONE-086</div>
+    <div class="card-content">
+        <div class="card-info">代码：SONE-086</div>
+        <div class="card-info">发布日期：2024-04-23</div>
+        <div class="card-info">类别：1080p, 高清, JAV</div>
+        <div class="card-info">导演：周一℃</div>
+        <div class="card-info">工作室：S1 NO.1 STYLE</div>
+        <div class="card-info">标签：索尼</div>
+        <div class="card-info">标签：美丽的女孩, 铁杆, 接吻, 讨厌, 苗条, Solowork</div>
+        <div class="card-info">系列：混合体液激烈性爱</div>
+        <div class="card-info">主演：贞松大辅、吉村拓、黑田裕人</div>
+        <div class="card-info">演员：小坂七中</div>
+        <!-- 下载链接为空，请提供有效的magnet链接或其他下载链接 -->
+        <a href="magnet:?xt=urn:btih:7ad8590c78a60b7bf9799b59d53effed5eba79aa&dn=SONE-086&xl=2250982616&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://explodie.org:6969/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://www.torrent.eu.org:451/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://open.stealth.si:80/announce&tr=udp://wambo.club:1337/announce&tr=udp://tracker.dutchtracking.com:6969/announce&tr=udp://tc.animereactor.ru:8082/announce&tr=udp://tracker.kamigami.org:2710/announce&tr=http://tracker.files.fm:6969/announce&tr=udp://opentracker.i2p.rocks:6969/announce&tr=https://tracker.nitrix.me:443/announce" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">SONE-043</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2024-03-22</div>
+        <div class="card-info">番号: SONE-043</div>
+        <div class="card-info">标题: 172cm 9.5頭身スタイル美少女の、初めて尽くしのめちゃイキ3本番Special 小坂七香</div>
+        <div class="card-info">女优: 小坂七香</div>
+        <div class="card-info">类型: 制服, 美少女, 单体作品, 玩具, 多人运动, 高清, 独家, 4K</div>
+        <div class="card-info">系列: 初体験○本番スペシャル</div>
+        <div class="card-info">发行商: S1</div>
+        <div class="card-info">导演: キョウセイ</div>
+        <div class="card-info">标签: S1 NO.1 STYLE</div>
+        <!-- 下载链接为空，请提供有效的magnet链接或其他下载链接 -->
+        <a href="magnet:?xt=urn:btih:9c3a0a0dd8eda7f1fd3e1b4136b7a1182a12993d&dn=sone-043&xl=7411528430&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://9.rarbg.com:2710/announce&tr=udp://public.popcorn-tracker.org:6969/announce&tr=http://182.176.139.129:6969/announce&tr=http://5.79.83.193:2710/announce&tr=http://91.218.230.81:6969/announce&tr=http://mgtracker.org:2710/announce&tr=http://mgtracker.org:6969/announce&tr=http://tracker1.wasabii.com.tw:6969/announce&tr=http://tracker2.itzmx.com:6961/announce&tr=udp://62.138.0.158:6969/announce&tr=udp://eddie4.nl:6969/announce&tr=udp://shadowshq.eddie4.nl:6969/announce&tr=udp://shadowshq.yi.org:6969/announce&tr=udp://tracker.eddie4.nl:6969/announce&tr=udp://tracker.mg64.net:2710/announce&tr=http://tracker.mg64.net:6881/announce&tr=udp://bt.xxx-tracker.com:2710/announce&tr=udp://tracker.mg64.net:6969/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://9.rarbg.com:2730/announce&tr=http://tracker.internetwarriors.net:1337/announce&tr=udp://tracker.tiny-vps.com:6969/announce&tr=udp://tracker.internetwarriors.net:1337/announce&tr=udp://mgtracker.org:2710/announce&tr=udp://91.218.230.81:6969/announce&tr=udp://182.176.139.129:6969/announce&tr=http://open.acgtracker.com:1096/announce&tr=udp://open.stealth.si:80/announce&tr=udp://151.80.120.114:2710/announce&tr=http://210.244.71.25:6969/announce&tr=udp://5.79.249.77:6969/announce&tr=http://173.254.204.71:1096/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://tracker.torrent.eu.org:451/announce" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">SONE-042</div>
+    <div class="card-content">
+        <div class="card-info">发行日期: 2024-02-23</div>
+        <div class="card-info">番号: SONE-042</div>
+        <div class="card-info">标题: 新人NO.1STYLE 身長172cm 9.5頭身スタイル少女 小坂七香 AVデビュー</div>
+        <div class="card-info">女优: 小坂七香</div>
+        <div class="card-info">类型: 美少女, 巨乳, 单体作品, 淫乱, 出道作, 高清, 独家, 4K</div>
+        <div class="card-info">系列: 新人NO.1 STYLE</div>
+        <div class="card-info">发行商: S1</div>
+        <div class="card-info">导演: キョウセイ</div>
+        <div class="card-info">标签: S1 NO.1 STYLE</div>
+        <!-- 下载链接为空，请提供有效的magnet链接或其他下载链接 -->
+        <a href="magnet:?xt=urn:btih:25d67b6d0b84ff55074483bdc12b364f55300e3e&dn=SONE-042&xl=2742535919&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://explodie.org:6969/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://www.torrent.eu.org:451/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://open.stealth.si:80/announce&tr=udp://wambo.club:1337/announce&tr=udp://tracker.dutchtracking.com:6969/announce&tr=udp://tc.animereactor.ru:8082/announce&tr=udp://tracker.kamigami.org:2710/announce&tr=http://tracker.files.fm:6969/announce&tr=udp://opentracker.i2p.rocks:6969/announce&tr=https://tracker.nitrix.me:443/announce" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">MIDV-637</div>
+    <div class="card-content">
+        <div class="card-info">DVD ID：MIDV-637</div>
+        <div class="card-info">内容 ID：midv00637</div>
+        <div class="card-info">发布日期：2024年5月3日</div>
+        <div class="card-info">时长：174分钟</div>
+        <div class="card-info">导演：京生キョウセイ</div>
+        <div class="card-info">工作室：穆迪兹</div>
+        <div class="card-info">类别：喷出特色女演员大奶洗剂三人/四人美丽的女孩独家经销4K高清</div>
+        <div class="card-info">演员：百田光希</div>
+        <!-- 下载链接为空，请提供有效的magnet链接或其他下载链接 -->
+        <a href="magnet:?xt=urn:btih:62e423827e71b887c67940f999a3366f2b4edc62&dn=midv-637-4k&xl=30395699144&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://tracker.archlinux.org.theoks.net:6969/announce&tr=udp://tracker.openbittorrent.com:6969&tr=http://tracker.tasvideos.org:6969/announce&tr=udp://tracker.leech.ie:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.internetwarriors.net:1337&tr=udp://tracker.internetwarriors.net:1337/announce&tr=udp://open.stealth.si:80/announce&tr=udp://9.rarbg.me:2710/announce&tr=udp://9.rarbg.me:2710&tr=http://anidex.moe:6969/announce&tr=http://freerainbowtables.com:6969/announce&tr=http://www.freerainbowtables.com:6969/announce&tr=udp://9.rarbg.com:2830/announce&tr=http://tracker2.itzmx.com:6961/announce&tr=http://tracker.etree.org:6969/announce&tr=http://www.thetradersden.org/forums/tracker:80/announce.php&tr=udp://udp-tracker.shittyurl.org:6969/announce&tr=https://tracker.shittyurl.org/announce&tr=http://tracker.shittyurl.org/announce&tr=udp://bt.firebit.org:2710/announce&tr=http://bt.firebit.org:2710/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://tracker.torrent.eu.org:451/announce" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">SONE-174</div>
+    <div class="card-content">
+        <div class="card-info">代码：SONE-174 [未经审查泄露]</div>
+        <div class="card-info">发布日期：2024-04-09</div>
+        <div class="card-info">运行时间：02:42:23</div>
+        <div class="card-info">女演员：鹅卵石稀有</div>
+        <div class="card-info">类型：巨乳、美少女、口交、单人作品、拍祖里、出道作品</div>
+        <div class="card-info">系列：新人一号风格</div>
+        <div class="card-info">标签：S1 No.1风格</div>
+        <div class="card-info">标签：索尼</div>
+        <!-- 下载链接为空，请提供有效的magnet链接或其他下载链接 -->
+        <a href="magnet:?xt=urn:btih:58922f306c82ed5a716f9254d7e887d7e62d9ad6&dn=sone-174&xl=8860166298&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://9.rarbg.com:2710/announce&tr=udp://public.popcorn-tracker.org:6969/announce&tr=http://182.176.139.129:6969/announce&tr=http://5.79.83.193:2710/announce&tr=http://91.218.230.81:6969/announce&tr=http://mgtracker.org:2710/announce&tr=http://mgtracker.org:6969/announce&tr=http://tracker1.wasabii.com.tw:6969/announce&tr=http://tracker2.itzmx.com:6961/announce&tr=udp://62.138.0.158:6969/announce&tr=udp://eddie4.nl:6969/announce&tr=udp://shadowshq.eddie4.nl:6969/announce&tr=udp://shadowshq.yi.org:6969/announce&tr=udp://tracker.eddie4.nl:6969/announce&tr=udp://tracker.mg64.net:2710/announce&tr=http://tracker.mg64.net:6881/announce&tr=udp://bt.xxx-tracker.com:2710/announce&tr=udp://tracker.mg64.net:6969/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.leechers-paradise.org:6969/announce&tr=udp://9.rarbg.com:2730/announce&tr=http://tracker.internetwarriors.net:1337/announce&tr=udp://tracker.tiny-vps.com:6969/announce&tr=udp://tracker.internetwarriors.net:1337/announce&tr=udp://mgtracker.org:2710/announce&tr=udp://91.218.230.81:6969/announce&tr=udp://182.176.139.129:6969/announce&tr=http://open.acgtracker.com:1096/announce&tr=udp://open.stealth.si:80/announce&tr=udp://151.80.120.114:2710/announce&tr=http://210.244.71.25:6969/announce&tr=udp://5.79.249.77:6969/announce&tr=http://173.254.204.71:1096/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://tracker.torrent.eu.org:451/announce" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">IDBD-897</div>
+    <div class="card-content">
+        <div class="card-info">番号: IDBD-897 (idbd00897)</div>
+        <div class="card-info">番号前缀: IDBD</div>
+        <div class="card-info">发行时间: 2023-08-04</div>
+        <div class="card-info">系列: アイデアポケットBEST</div>
+        <div class="card-info">片商: Idea Pocket</div>
+        <div class="card-info">厂牌: アイデアポケットBEST</div>
+        <div class="card-info">类别: 四小时以上作品、高清、独家分发、数位马赛克、姐姐、女色情狂、单体作品、女优精选集</div>
+        <a href="magnet:?xt=urn:btih:E70255E21F69147AC1B61F4DB69CF8B6A35DE66B" class="download-btn">下载</a>
+    </div>
+</div>
+
+<div class="card">
+  <div class="card-category"></div>
+  <div class="card-title">我是你可爱的小猫</div>
+  <div class="card-content">
+    <div class="download-section">
+      <div class="card-info">#我是你可爱的小猫</div>
+      <div class="card-info">另外有个叫 #笔芯优优</div>
+      <a href="magnet:?xt=urn:btih:AC7B9763FB591C92998E5766F11ADED181B999DF" class="download-btn">下载</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-category"></div>
+  <div class="card-title">七泽美亚 2017-2020</div>
+  <div class="card-content">
+    <div class="download-section">
+      <div class="card-info">七泽美亚 2017-2020</div>
+      <div class="card-info">37单体+2合集+5写真</div>
+      <div class="card-info">文件大小: 273.6 GiB</div>
+      <div class="card-info"><a href="magnet:?xt=urn:btih:04b133c1554e84a76f8bc49b91311c272b5843c8" class="download-btn">下载</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">深田咏美</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                <div class="card-info">#深田咏美 #深田えいみ </div>
+                <div class="card-info">高清无水印中文字幕97部合集 
+                </div>
+                <div class="card-info">文件大小:509.7 GiB</div>
+            </div>
+            <a href="magnet:?xt=urn:btih:a01e6281323ea41efac7614724772e9b749da5f8" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">国内自拍偷拍合集1000部</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                <div class="card-info">国内自拍偷拍合集</div>
+<div class="card-info">1000部高清露脸无水印
+内含香港三级片</div>
+<div class="card-info">#自拍 #偷拍 #国产 #三级 </div>
+<div class="card-info">资源大小:484.7 GB</div>
+            </div>
+            <a href="magnet:?xt=urn:btih:19b90f006dfcfea784a22e385f6a5384e21b0a2c" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">樱由罗</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+    <div class="card-info">Sakura Yura Mega
+Pack no Watermarks
+<p>#樱由罗 #さくらゆら
+<p>超大合集 6000K MP4无水印 
+<p>文件大小:279.3 GB</div>
+            </div>
+            <a href="magnet:?xt=urn:btih:b4cdca970bf744b35feb06a8e025c3ff8c6d0985" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">凯登克罗斯</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                #凯登克罗斯 
+<p>#KaydenKross Impulse
+<p>(Kayden Kross, Deeper)
+<p>WEB-DL 1080p Split Scenes 
+<p>文件大小:11.15GB
+            </div>
+            <a href="magnet:?xt=urn:btih:43ad30d75c2a356e6369bf65cc0a61987d95973a" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">有坂深雪</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                #有坂深雪 
+<p>文件大小：128.86 GB
+            </div>
+            <a href="magnet:?xt=urn:btih:5941376325c85f0f6ae918af1de5ecd1527ffe2c" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">2019日本高清无码步兵</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                2019日本高清 
+<p>#无码 #步兵 
+<p>1000部合集 
+<p>文件大小:622.7 GB
+            </div>
+            <a href="magnet:?xt=urn:btih:73ce44039423258d5dbb9218c2bdbd93d7fef1ac" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">多位艺人 写真合集</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                多位艺人 #写真 
+<p>合集IDOL PACK 
+<p>[MKV/604GB]HD1080p 
+<p>文件大小:604.4 GB
+            </div>
+            <a href="magnet:?xt=urn:btih:d0d5df4e2c985913c1de0db07ef68d9d7229e7c4" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIDE-604</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                MIDE-604 #水卜樱
+
+<p>#巨乳 #情趣内衣 
+<p>#乳交 #口交 #女上位
+
+<p>#JAV高分推荐 🔥8.5分🔥
+
+<p>性欲太强在俱乐部和水卜樱直接做
+            </div>
+            <a href="magnet:?xt=urn:btih:118c697d1b929d402b19a12bd52d84bdf29624cf" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIDV-236</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                代码：MIDV-236
+
+<p>发布日期： 2023-03-21
+
+<p>类别： 1080p ,英文字幕 JAV , HD , JAV
+
+<p>导演: 翔天士郎
+
+<p>工作室： 穆迪兹
+
+<p>标签： MIDV
+
+<p>标签: 3P , 4P ,滥用,数字马赛克,老朋友, POV ,滥交, Solowork
+
+<p>系列： 看到我陷入 kime-sex 并获得渣子勃起
+
+<p>主演： 队长、尼克、Q-Be
+
+<p>演员: 七泽美亚
+            </div>
+            <a href="magnet:?xt=urn:btih:e61a1cd7e395e34627ddc1b2e7405ca591302056&tr=http%3A%2F%2Fsukebei.tracker.wf%3A8888%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">ADN-106</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                导演:贞冈贞夫
+
+<p>厂牌: Otona No Drama工作室:攻击者
+
+<p>主演:松下纱荣子
+
+<p>类型:特色女演员,已婚妇女,尴尬,减少马赛克画质:高清
+
+<p>发布日期:2016年10月2日片长:116分钟
+
+<p>添加:2年前浏览次数:36.3K
+
+<p>描述:还原马赛克版松下纱荣子在《我只想被你爱着》中的表演。松下纱荣子。(adn00106、ADN-106)。
+
+<p>这部电影是关于尴尬、已婚妇女、特色女演员的。与其他人评价并讨论该视频。
+            </div>
+            <a href="magnet:?xt=urn:btih:6a76e30949fc635fcfc06a2365f7e068aaeeef56&tr=http%3A%2F%2Fsukebei.tracker.wf%3A8888%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">鈴村あいり</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                #鈴村あいり 
+<p>1080p HD
+<p>超級合集 HD 
+<p>文件大小:584.6 GB
+            </div>
+            <a href="magnet:?xt=urn:btih:d8e8a9a479a65a6e0a489e745c2961e280231a53" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">岛国混血巨乳肥臀坦克女优</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                岛国混血巨乳肥臀坦克女优
+<p>【 #永井玛利亚 】
+<p>#OnlyFans 
+<p>自拍视频合集 
+<p>文件大小:7.26GB
+            </div>
+            <a href="magnet:?xt=urn:btih:1F58E748AB1CC32B219BA0CDF24C37E21CFA5B53" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">九尾狐狸m</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                #九尾狐狸m 
+<p>13.74G合集
+            </div>
+            <a href="magnet:?xt=urn:btih:DA857BC6D70B69528C9DA1FF398A83B3A3ABF575" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">香草少女</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                香草少女 
+            <p>142.5G大合集
+            </div>
+            <a href="magnet:?xt=urn:btih:C18CC703BFA56FD99BB29285595B9073875648B5" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">ABW-293</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                ABW-293(2022)
+
+<p>★★★★★★★★★★ 
+<p>4.52 共有389个评分
+
+<p>18 2022-11-03(JP) 245分
+
+<p>作品番号ABW-293是由八掛うみ出演的日本电影，于2022-11-03(JP)发行，全片片长245分，由プレステージ厂商制作，本片原名是：風俗タワー PREMIUM ACT.02。
+
+<p>チャーリー中田
+
+<p>导演
+
+<p>演员
+
+<p>八掛うみ
+            </div>
+            <a href="magnet:?xt=urn:btih:dead90c9f397a441bdf3d0881bd72fddb72b3602&dn=ABW-293+Umi+Yatsugake+%E5%85%AB%E6%8E%9B%E3%81%86%E3%81%BF+%5BFHD%5D%5BHEVC%5D&xl=3689626861&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://open.tracker.cl:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://9.rarbg.com:2810/announce&tr=udp://www.torrent.eu.org:451/announce&tr=udp://tracker1.bt.moack.co.kr:80/announce&tr=udp://tracker0.ufibox.com:6969/announce&tr=udp://tracker.zerobytes.xyz:1337/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://tracker.tiny-vps.com:6969/announce&tr=udp://tracker.openbittorrent.com:6969/announce&tr=udp://tracker.moeking.me:6969/announce&tr=udp://tracker.bitsearch.to:1337/announce&tr=udp://tracker.altrosky.nl:6969/announce&tr=udp://retracker.netbynet.ru:2710/announce&tr=udp://opentor.org:2710/announce&tr=udp://open.stealth.si:80/announce&tr=udp://mts.tvbit.co:6969/announce&tr=udp://movies.zsw.ca:6969/announce&tr=udp://retracker.lanta-net.ru:2710/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://bt2.archive.org:6969/announce&tr=udp://bt1.archive.org:6969/announce&tr=https://tracker.lilithraws.cf:443/announce&tr=https://tracker.iriseden.fr:443/announce&tr=https://tracker.iriseden.eu:443/announce&tr=http://tracker1.bt.moack.co.kr:80/announce&tr=http://tracker.xn--vzyr4p.top:80/announce&tr=http://tracker.openbittorrent.com:80/announce" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">ipzz-276</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                代码: IPZZ-276
+
+<p>发布日期: 2024-05-14
+
+<p>长度: 02:29:15
+
+<p>演员: Saki Sasaki
+
+<p>类型: 美丽的女孩, 加尔, 单一作品, 撒尿/漏水, 多个故事
+
+<p>标签: 组织
+
+<p>标签: IPZZ
+            </div>
+            <a href="magnet:?xt=urn:btih:a73052ae4c4e3a62e224fef1feb65fac33a82d52" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-842</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-06-27
+
+<p>番号: STARS-842
+
+<p>标题: 小湊よつ葉 不良生徒の俺を甘いキスで翻弄してくる家庭教師のよつ葉先生との接吻ラブストーリー
+
+<p>女优: 小凑よつ叶 (小湊よつ葉)
+
+<p>类型: 家庭教师, 剧情
+
+<p>发行商: SOD
+
+<p>导演: 太宰珍歩
+
+<p>标籤: SODstar
+            </div>
+            <a href="magnet:?xt=urn:btih:d682438329e44a0508ee3a0d31dd5013cd7a133a&dn=[javdb.com]stars-842-4k.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">ZEX-421</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                ZEX-421 メイド教育。-没落貴族 瑠璃川椿- 渚みつき
+
+<p>代码: ZEX-421
+
+<p>发布日期: 2022-12-15
+
+<p>长度: 01:58:57
+
+<p>演员: Mitsuki Nagisa
+
+<p>类型: 体内射精, 美丽的女孩, 假阳具, 女佣, 原创合作
+
+<p>标签: 彼得斯·麦克斯
+
+<p>标签: ZEX
+            </div>
+            <a href="magnet:?xt=urn:btih:9fb4638c1ad6876234376ce1a96361c2f0d7ef79&dn=ZEX-421&xl=1303039954&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=http://tracker.opentrackr.org:1337/announce&tr=udp://9.rarbg.com:2810/announce&tr=udp://tracker.openbittorrent.com:6969/announce&tr=udp://open.tracker.cl:1337/announce&tr=http://tracker.openbittorrent.com:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://tracker.tiny-vps.com:6969/announce&tr=udp://tracker.moeking.me:6969/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://public.tracker.vraphim.com:6969/announce&tr=udp://p4p.arenabg.com:1337/announce&tr=udp://opentracker.i2p.rocks:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://open.demonii.com:1337/announce&tr=udp://movies.zsw.ca:6969/announce&tr=udp://ipv4.tracker.harry.lu:80/announce&tr=udp://explodie.org:6969/announce&tr=udp://exodus.desync.com:6969/announce&tr=https://tracker.nanoha.org:443/announce&tr=https://tracker.lilithraws.org:443/announce&tr=https://tracker.cyber-hub.net:443/announce&tr=https://tr.burnabyhighstar.com:443/announce&tr=https://opentracker.i2p.rocks:443/announce&tr=http://vps02.net.orel.ru:80/announce&tr=http://tracker.mywaifu.best:6969/announce&tr=http://tracker.files.fm:6969/announce&tr=http://t.overflow.biz:6969/announce&tr=http://fosstorrents.com:6969/announce&tr=udp://www.peckservers.com:9000/announce&tr=udp://vibe.sleepyinternetfun.xyz:1738/announce&tr=udp://v2.iperson.xyz:6969/announce&tr=udp://uploads.gamecoast.net:6969/announce&tr=udp://tracker2.dler.org:80/announce&tr=udp://tracker1.myporn.club:9337/announce&tr=udp://tracker1.bt.moack.co.kr:80/announce&tr=udp://tracker.zemoj.com:6969/announce&tr=udp://tracker.theoks.net:6969/announce&tr=udp://tracker.tcp.exchange:6969/announce&tr=udp://tracker.srv00.com:6969/announce&tr=udp://tracker.publictracker.xyz:6969/announce&tr=udp://tracker.pomf.se:80/announce&tr=udp://tracker.openbtba.com:6969/announce&tr=udp://tracker.novaopcj.eu.org:6969/announce&tr=udp://tracker.monitorit4.me:6969/announce&tr=udp://tracker.leech.ie:1337/announce&tr=udp://tracker.joybomb.tw:6969/announce&tr=udp://tracker.jonaslsa.com:6969/announce&tr=udp://tracker.encrypted-data.xyz:1337/announce&tr=udp://tracker.ddunlimited.net:6969/announce&tr=udp://tracker.bitsearch.to:1337/announce&tr=udp://tracker.auctor.tv:6969/announce&tr=udp://tracker.artixlinux.org:6969/announce&tr=udp://tracker.army:6969/announce&tr=udp://tracker.altrosky.nl:6969/announce&tr=udp://tracker.4.babico.name.tr:3131/announce&tr=udp://tracker-udp.gbitt.info:80/announce&tr=udp://tr.cili001.com:8070/announce&tr=udp://tr.bangumi.moe:6969/announce&tr=udp://torrents.artixlinux.org:6969/announce&tr=udp://torrentclub.space:6969/announce&tr=udp://thouvenin.cloud:6969/announce&tr=udp://themaninashed.com:6969/announce&tr=udp://tamas3.ynh.fr:6969/announce&tr=udp://slicie.icon256.com:8000/announce&tr=udp://sanincode.com:6969/announce&tr=udp://run.publictracker.xyz:6969/announce&tr=udp://run-2.publictracker.xyz:6969/announce&tr=udp://rep-art.ynh.fr:6969/announce&tr=udp://qtstm32fan.ru:6969/announce&tr=udp://public.publictracker.xyz:6969/announce&tr=udp://psyco.fr:6969/announce&tr=udp://open.tracker.ink:6969/announce&tr=udp://open.free-tracker.ga:6969/announce&tr=udp://open.dstud.io:6969/announce&tr=udp://new-line.net:6969/announce&tr=udp://moonburrow.club:6969/announce&tr=udp://mirror.aptus.co.tz:6969/announce&tr=udp://mail.zasaonsk.ga:6969/announce&tr=udp://mail.artixlinux.org:6969/announce&tr=udp://leefafa.tk:6969/announce&tr=udp://laze.cc:6969/announce&tr=udp://kokodayo.site:6969/announce&tr=udp://htz3.noho.st:6969/announce&tr=udp://fh2.cmp-gaming.com:6969/announce&tr=udp://fe.dealclub.de:6969/announce&tr=udp://f1sh.de:6969/announce&tr=udp://epider.me:6969/announce&tr=udp://download.nerocloud.me:6969/announce&tr=udp://cutscloud.duckdns.org:6969/announce&tr=udp://concen.org:6969/announce&tr=udp://chouchou.top:8080/announce&tr=udp://carr.codes:6969/announce&tr=udp://camera.lei001.com:6969/announce&tr=udp://bt2.archive.org:6969/announce&tr=udp://bt1.archive.org:6969/announce&tr=udp://bt.ktrackers.com:6666/announce&tr=udp://black-bird.ynh.fr:6969/announce&tr=udp://astrr.ru:6969/announce&tr=udp://admin.52ywp.com:6969/announce&tr=udp://aarsen.me:6969/announce&tr=https://tracker2.ctix.cn:443/announce&tr=https://tracker1.520.jp:443/announce&tr=https://tracker.tamersunion.org:443/announce&tr=https://tracker.moeblog.cn:443/announce&tr=https://tracker.kuroy.me:443/announce&tr=https://tracker.gbitt.info:443/announce&tr=https://tracker.foreverpirates.co:443/announce&tr=https://1337.abcvg.info:443/announce&tr=http://www.peckservers.com:9000/announce&tr=http://wepzone.net:6969/announce&tr=http://tracker4.itzmx.com:2710/announce&tr=http://tracker3.itzmx.com:6961/announce&tr=http://tracker3.ctix.cn:8080/announce&tr=http://tracker2.itzmx.com:6961/announce&tr=http://tracker2.dler.org:80/announce&tr=http://tracker1.itzmx.com:8080/announce&tr=http://tracker1.bt.moack.co.kr:80/announce&tr=http://tracker.zerobytes.xyz:1337/announce&tr=http://tracker.skyts.net:6969/announce&tr=http://tracker.novaopcj.eu.org:6969/announce&tr=http://tracker.gbitt.info:80/announce&tr=http://tracker.encrypted-data.xyz:1337/announce&tr=http://tracker.dler.org:6969/announce&tr=http://tracker.bt4g.com:2095/announce&tr=http://tr.cili001.com:8070/announce&tr=http://t.acg.rip:6699/announce&tr=http://parag.rs:6969/announce&tr=http://open.tracker.ink:6969/announce&tr=http://open.acgnxtracker.com:80/announce&tr=http://fxtt.ru:80/announce&tr=http://bt.okmp3.ru:2710/announce&tr=http://1337.abcvg.info:80/announce" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">最佳极品丝袜合集</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                日本 #有码 #完全着衣 
+<p>#高颜值 #女学生 #丝袜 
+<p>#足交 系列91部合集 
+<p>#OKP #制服 #美腿 #黑丝 <p>【本年度最佳极品丝袜合集】 
+<p>文件大小：115GB
+            </div>
+            <a href="magnet:?xt=urn:btih:5a9c6e47f191ddc94f7bcbc093b79cb365afb38f" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SDMJ-968</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                代码: SDMU-968
+
+<p>发布日期: 2021-10-07
+
+<p>长度: 02:16:15
+
+<p>演员: Yui Kawamura
+
+<p>类型: 戏剧, 数码莫, 美丽的胸部, 出道作品
+
+<p>制作者: Sod 创建
+
+<p>标签: 草皮
+
+<p>标签: SDMU
+            </div>
+            <a href="magnet:?xt=urn:btih:1C3BB47F10D41E4CD53D9F68C482A5D65412FA6C&dn=sdmu-968" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MEKI-006</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2018-10-27
+
+<p>番号: MEKI-006
+
+<p>标题: VRでオナニーに梦中のお兄ちゃんの大きくなってるおチ○チンを近くで见ていたら、エッチな気持ちになっちゃって、悪戏しちゃって…お兄ちゃんとリアルにSEXしちゃった
+
+<p>类型: 女高中生,校服,乱伦,企划,姐妹,颜射,高清
+
+<p>系列: VRでオナニーに梦中の○○とリアルにSEXしちゃった
+
+<p>发行商: MERCURY（マーキュリー）
+
+<p>标签: きかくのき
+            </div>
+            <a href="magnet:?xt=urn:btih:9898C8DBAFA2D8E74F91D9266FB6C70C5361D327&size=5843974601&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-843</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                SSIs-843 比AI还棒的女性肉体柔弱乖巧的高中生是被中年老男人包养的巨乳萝莉Manko-chan宇野美玲
+                
+<p>发行日期2023-08-22 时间180
+
+<p>星星 宇野美玲 东云美玲 类型克制 
+
+<p>个人作品 制服 女学生 乳房 顺从的女人
+
+<p>导演:因纳巴尔
+
+<p>制作者:S11号款式
+
+<p>标签安全信息系统 843843号 SsIS843 sSIs-843 ssIs-843 
+
+<p>女性身体那 是 更好的比人工智能 虚弱的 听话 女学生 是A洛丽塔 丰满 万子酱 wHO 迪是 保留 经过 中年 老的 男性 米雷 乌诺
+            </div>
+            <a href="magnet:?xt=urn:btih:d711ec20b4a2c3f79c944793126b8dfbfbaede66&dn=[javdb.com]SSIS-843-C.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">KSJK-017</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                编号: KSJK-017
+
+<p>发布日期： 2023-10-17
+
+<p>运行时间： 01:48:15
+
+<p>女演员： 工藤拉拉
+
+<p>类型： 小乳房、 制服、 娇小、 单一作品、 乱伦、 女儿/养女
+
+<p>标签： 教条
+
+<p>标签： KSJK
+            </div>
+            <a href="magnet:?xt=urn:btih:15466e2e5c1b031988b1e56c2c1d6cfb4398e940&dn=[javdb.com]KSJK-017" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-916</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:SSIS-916 .
+
+<p>登行日期:2023-10-25
+
+<p>畤畏:120 m
+
+<p>遵演:TAKE-D
+
+<p>片商: S1 NO.1 STYLE
+
+<p>解分:★★★★★4.37分,由867人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:ce511c86af4cd0a40a9b5eb71786263d5c10e24b&dn=[javdb.com]SSIS-916-UC.torrent.%E6%97%A0%E7%A0%81%E7%A0%B4%E8%A7%A3" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-247</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢: SSIs-247
+
+<p>赉行日期:2021-12-28
+
+<p>畤艮:150 m
+
+<p>导演:KC武田
+
+<p>片商: S1 NO.1 STYLE
+
+<p>评分:★★★★★4.15分,由512人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:3473faaa7fa8bf5358bf1c534e69f17329a78c85&dn=[javdb.com]ssis-247-C.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-151</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢: SSIS-151
+
+<p>癸行日期: 2021-08-19
+
+<p>畤艮:150 m
+
+<p>遵演:KC武田
+
+<p>片商: S1 NO.1 STYLE
+
+<p>部分:★★★★★4.22分,由312人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:336e8a0c036ccfe941b55ddc11d25839baa09b3b&dn=[javdb.com]ssis-151.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-578</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢: SSIS-578
+
+<p>登行日期:2022-11-09
+
+<p>畤艮: 150 m
+
+<p>停演:前田文豪
+
+<p>片商: S1NO.1 STYLE
+
+<p>系列:相部屋NTR不偷也y夕又(己明(分暮机左出張先D夜呼
+
+<p>部分:★★★★★4.51分,由2059人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:f10b4c315a2c55ab6465d33dfbeae9a6e67c76c8&dn=[javdb.com]SSIS-578-UC.torrent.%E6%97%A0%E7%A0%81%E7%A0%B4%E8%A7%A3" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-988</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:SSIs-988
+
+<p>赉行日期:2023-12-26
+
+<p>畤艮:120 m
+
+<p>遵演:小松也子不一2片商: S1 NO.1 STYLE
+
+<p>登行商: S1NO.1 STYLE
+
+<p>部分:★★★★★4.36分,由867人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:a3cfc330de13cd659a9cc2c46d2c1db845092439&dn=[javdb.com]SSIS-988-UC.torrent.%E6%97%A0%E7%A0%81%E7%A0%B4%E8%A7%A3" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FCT-106</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:FCT-106
+
+<p>登行日期:2024-03-31
+
+<p>畤艮:90 m
+
+<p>片商:黑船轰行商:黑船
+
+<p>部分:★★★★★4.03分,由60人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:32c1ad81c04190db884bc6d8bb6483eb956e30c0&dn=[javdb.com]FCT-106" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SONE-159</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:SONE-159
+
+<p>登行日期:2024-04-24
+
+<p>畤畏:160 m
+
+<p>遵演:寸/代—儿片商: S1 NO.1 STYLE
+
+<p>解分:★★★★★4.32分,由196人评價
+            </div>
+            <a href="magnet:?xt=urn:btih:fbee9c012fb4748f7fb4a36d026c233f81accd90&dn=[javdb.com]SONE-159" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FSDSS-741</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:FSDSS-741
+
+<p>登行日期:2024-04-25
+
+<p>畤z: 150 m
+
+<p>遵演:竿汁王子片商: FALENO
+
+<p>部分:★★★★★4.1分,由138人逐價
+            </div>
+            <a href="magnet:?xt=urn:btih:1826708ba25ee5632ebdeec195cf5bc8e5237203&dn=[javdb.com]fsdss-741.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FSDSS-762</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:FSDSS-762
+
+<p>登行日期:2024-04-25
+
+<p>畤畏:170 m
+
+<p>停演:磷井瞥片商:FALENO
+
+<p>呼分:★★★★★4.23分,由564人e價
+            </div>
+            <a href="magnet:?xt=urn:btih:9796d1f722dfac155e36d70f9ce993c490bb3d2b&dn=[javdb.com]fsdss-762.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIDV-383</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                内容ID:midv00383
+
+<p>DVD ID:MIDV-383
+
+<p>发行日 2023-06-16期:
+
+<p>长度:159分
+
+<p>导演:时尚山口
+
+<p>系列:
+
+<p>制作商:穆迪
+
+<p>发行商: MOODYZ DIVA
+
+<p>类别:绿帽/NTR 4K吹箫荡妇亲亲单体作品 女老板数码马赛克高画质
+
+<p>演员:有一个新的 ★★★食(9.0) 使用者评价
+            </div>
+            <a href="magnet:?xt=urn:btih:0006916da3aa6dbeaf254dc8eada4e97cdbf7d11&dn=[javdb.com]MIDV-383-UC.torrent.%E6%97%A0%E7%A0%81%E7%A0%B4%E8%A7%A3" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIDV-354</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:MIDV-354
+
+<p>登行日期:2023-05-17
+
+<p>畤畏: 120 m
+
+<p>停演:女y术口太郎片商:MOODYZ
+
+<p>系列:放裸後亏示て何度屯、何度屯、七义勺又Lてu丰○龙...
+
+<p>评分:★★★★★4.49分,由2051人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:86500595d52f7d1fa70f365ec190069bb051b1c5&dn=[javdb.com]midv-354-UC.torrent.%E6%97%A0%E7%A0%81%E7%A0%B4%E8%A7%A3" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FSKT-033</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢: FSKT-033
+
+<p>登行日期: 2017-12-08
+
+<p>畤艮:120 m
+
+<p>片商: First Star
+
+<p>登行商:凳掘
+
+<p>评分:★★★★ 4.11分,由173人呼價
+            </div>
+            <a href="magnet:?xt=urn:btih:8e32ead4e6b6e8d07b8044e3e8a6511236b8df70&dn=[javdb.com]fskt-033.mp4" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIAA-317</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                电影信息: 代码:MIAA-317
+
+<p>在线直播: 观看次数:412,930
+
+<p>发布日期:2020-09-13
+
+<p>发布日期:2021年12月4
+
+<p>类别:1080p、英语字幕 日 JAV、高清、JAV +98 -22
+
+<p>导演:山口桃速代
+
+<p>工作室:MOODYZ标签:MIAA
+
+<p>标签:骑乘式、中出、数位马赛克、女搜查员、苗条、痴女演员:羽田 演员:莲见红蕾、仓田真央
+            </div>
+            <a href="magnet:?xt=urn:btih:79942E3B03CD650739526576DF3CB9A5D9ADD4C3&dn=miaa-317-C" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">CAWD-676</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:CAWD-676
+
+<p>婺行日期:2024-06-04
+
+<p>畤畏: 160 m
+
+<p>遵演:ZAMPA片商: kawaii
+
+<p>部分:★★★★★4.58分,由271人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:f941ea9df18aa3f7ebf3e34027a4057f2522e53f&dn=[javdb.com]cawd-676" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIDV-726</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:MIDV-726
+
+<p>登行日期:2024-04-16
+
+<p>畤畏:120 m
+
+<p>淳演:卜V少宁〈山口
+
+<p>片商:MOODYZ
+
+<p>评分:★★★★★4.18分,由1225人r價
+            </div>
+            <a href="magnet:?xt=urn:btih:bbc6ec08139f5b82f7b077666db29de004066646&dn=[javdb.com]MIDV-726" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-806</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:SSIS-806
+
+<p>癸行日期:2023-07-25
+
+<p>畤畏:120 m
+
+<p>停演:人于/代—儿
+
+<p>片商: S1 NO.1 STYLE
+
+<p>部分:★★★★★4.57分,由3348人呼價
+            </div>
+            <a href="magnet:?xt=urn:btih:68a1aac2e360d870768640abf8e3ce20edc4d0b7&dn=[javdb.com]SSIS-806-C.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">HND-169</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:HND-169
+
+<p>登行日期:2015-04-25
+
+<p>畤畏:150 m
+
+<p>遵演:子主亏亏不一
+
+<p>片商:本中
+
+<p>登行商:本中
+
+<p>系列:绝对制服美少女
+
+<p>部分:★★★★★4.15分,由208人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:73873313deb4c7a2ed28d7389252984b2e04167c&dn=[javdb.com][FHD]HND-169.mkv" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">Fantia-posts-2284636</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:8e135059831fcfebce3b58ca384c458f7ed2cb40" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">ABP-984</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发布日期： 2020-06-12
+
+<p>代码: ABP-984
+
+<p>标题: 中出し射精执行官05ドS执行官が爆速骑位で、不纯精子搾り取る！！ 涼森れむ
+
+<p>演员: 铃森玲梦
+
+<p>主演： 吉村隆、桥本圣吾、雪音秀行、Tatsu、大泽慎二
+
+<p>类型： 个人、中出、肛交、高清
+
+<p>系列: 强●中出し射精执行官
+
+<p>制造商： Prestige
+
+<p>导演: ひらひらへんどりっくす
+
+<p>标签： 绝对完美
+            </div>
+            <a href="magnet:?xt=urn:btih:759E67049CA85FF3F75D9EB972DB683B056CDCE1&size=7436213243&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SVDVD-736</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发布日期: 2019-06-20
+
+<p>代码: SVDVD-736
+
+<p>标题： 羞羞新生育儿健康诊断令和元年〜初夏〜
+
+<p>主演： Pierre Sword、葵雄太
+
+<p>类型： 羞耻、娇小、制服、4小时或以上、高清
+
+<p>系列： 羞恥！
+
+<p>制作者： Sadistic Village
+
+<p>导演: ニューカジー風間
+            </div>
+            <a href="magnet:?xt=urn:btih:9F47B884E6EF6539C7B7964755258AE46BB2B4B1&size=2802708403&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FC2-PPV-4416932</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                代码: FC2-PPV-4416932
+
+<p>发布日期： 2024-05-05
+
+<p>运行时间： 03:01:07
+
+<p>类型： 业余
+
+<p>标签： FC2
+            </div>
+            <a href="magnet:?xt=urn:btih:21A614E80103B2B530E43D02F2E524E0CF194E3C" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-043</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发布日期: 2019-03-07
+
+<p>代码： STARS-043-UNCENSORED-LEAK
+
+<p>标题： 小仓由菜 672小时禁欲与焦糖溢出来的美味佳肴
+
+<p>演员: 小仓由奈
+
+<p>类型： 未经审查的泄漏，特写，个人，滥交，高清
+
+<p>系列： メレンゲになるまでピストン
+
+<p>制造商： SOD
+
+<p>导演： ZAMPA
+
+<p>标签: SOD明星
+            </div>
+            <a href="magnet:?xt=urn:btih:D973A6C9504123F896025A79ECF19BC2FD24CBA6&dn=STARS-043" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-042</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发布日期: 2019-04-11
+
+<p>代码: STARS-042
+
+<p>标题: 禁された美人スクープカメラマン 市川まさみ
+
+<p>演员: 市川雅美
+
+<p>主演： 田渊昌博、池田哈比、柏木顺吉
+
+<p>类型： 羞辱、苗条、个人、剧情、高清
+
+<p>制造商： SOD
+
+<p>导演: 寿KOTOBUKI
+
+<p>标签: SOD明星
+            </div>
+            <a href="magnet:?xt=urn:btih:75BCB4FDF28FA3829CF3A026CE79D65D5B19F96E&size=4467784026&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-035</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                代号： STARS-035 [未经审查泄露]
+
+<p>发布日期: 2019-02-07
+
+<p>运行时间： 02:32:03
+
+<p>女演员: Yui Mahiro
+
+<p>类型： 美少女、 潮吹、 淫乱/硬核系统、 多重故事
+
+<p>标签： Sodstar
+
+<p>标签： 明星
+            </div>
+            <a href="magnet:?xt=urn:btih:0807A43C894A9803006C12070CD91D3D0D1DC629&dn=STARS-035-uncensored-HD" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-016</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                代号： STARS-016 [未经审查泄露]
+
+<p>发布日期： 2018-12-20
+
+<p>运行时间： 04:21:45
+
+<p>女主角： 佐藤ヶ浦 (加藤桃)
+
+<p>类型： 中出、 美少女、 乱交、 粉丝答谢/家访
+
+<p>制造商： Sod Create
+
+<p>标签： Sodstar
+
+<p>标签： 明星
+            </div>
+            <a href="magnet:?xt=urn:btih:0BB7473C782BE005028BB5AC82C133C6335F8273&dn=%28%E7%84%A1%E4%BF%AE%E6%AD%A3-%E6%B5%81%E5%87%BA%29+STARS-016+%28Uncensored+Leaked%29+%E7%9C%9F%E6%AD%A3%E4%B8%AD%E5%87%BA%E3%81%9712%E7%99%BA%EF%BC%81+%E4%B8%AD%E5%87%BA%E3%81%97%E3%83%95%E3%82%A1%E3%83%B3%E6%84%9F%E8%AC%9D%E7%A5%AD+%E5%8A%A0%E8%97%A4%E3%82%82%E3%82%82%E3%81%8B+%28Satou+Nonoka%29" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-991</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                识别码: STAR-991
+
+<p>发行日期: 2018-10-25
+
+<p>长度: 135 分钟
+
+<p>导演: 小坂虎
+
+<p>制作商: SOD创造
+
+<p>发行商: SOD明星
+
+<p>使用者评价: 6.1分
+
+<p>类别: 单体作品美容院其他恋物癖按摩数位马赛克
+
+<p>演员: 加藤百华还是 佐藤
+            </div>
+            <a href="magnet:?xt=urn:btih:64BC30740E910A32B07864E10461C4E7F7E74DAA&dn=STAR-991" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-971</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2018-09-06
+
+<p>番号: STAR-971
+
+<p>标题: SODstar 唯井まひろ 18歳 止まらない…超大量潮吹き！
+
+<p>女优: 唯井真寻 (唯井まひろ)
+
+<p>类型: 中文字幕, 美少女, 单体作品, 潮吹, 主观视角, 高清
+
+<p>系列: SODstar
+
+<p>发行商: SOD
+
+<p>导演: 木村真也
+
+<p>标籤: SOD star
+            </div>
+            <a href="magnet:?xt=urn:btih:0DA32557D7A468BE896CFA85EACC565BCC174DC2&size=10715064330&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-931</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发布日期： 2023-09-26
+
+<p>代码： STARS-931
+
+<p>标题: 芸能界引退后、即AV播放渚恋生【圧倒的4K映像でヌク！】
+
+<p>演员: 恋尾渚
+
+<p>类型： 巨乳、纪录片、个人、艺术家、出道、高清、柔软身体、4K
+
+<p>系列： AV DEBUT(STAR)
+
+<p>制造商： SOD
+
+<p>导演: 星シュート
+
+<p>标签: SOD明星
+            </div>
+            <a href="magnet:?xt=urn:btih:CEACD556EE728998538BD11805E179C681402463&size=7543991832&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SHKD-854</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:SHKD-854
+
+<p>赉行日期: 2019-05-07
+
+<p>畤畏: 120 m
+
+<p>片商: Attackers
+
+<p>登行商:死夜恶
+
+<p>系列:单独强轰√二了
+
+<p>部分:★★★★★3.98分,由100人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:e0d307ca359bb9041b4b8e2aa32765440100daa5&dn=[javdb.com][22sht.me]shkd-854-C.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-990</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:11165C4A68C9B1D4736D22115A7074DE98231115&x._t-v1=513190262743237993" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">midv-699</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:CDEAB6DEE89A648AF79D875940129BD5BA164B66&x._t-v1=51319040321886756" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">EBWH-078cos</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:1a6de88d10e3be368a57e28fdf8a43d9c88c9014&dn=[javdb.com]EBWH-078-C.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">GDJU-028</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:780164f4e37622fd6344adb36652225733489bc2&dn=[Thz.la]gdju-028" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">LOVE-375</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:ca4b16cacd1c5655649ee1fa59cc8a190a45a8d1&dn=[onejav]%20LOVE-375" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">GDJU-025</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="magnet:?xt=urn:btih:147db9e1426291c4092549dbb2e814dec662817a&dn=GDJU-025-1080p.mp4" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">KAWD-772</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                炒菜
+            </div>
+            <a href="magnet:?xt=urn:btih:305c30ddc1a339d00fa738fc64119a67fc3c9766&dn=KAWD-772.mp4&xl=1570255025&tr=http://sukebei.tracker.wf:8888/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.opentrackr.org:1337&tr=udp://37.187.96.78:6969/announce&tr=udp://37.187.96.78:6969&tr=udp://37.187.96.78:6969/&tr=udp://eddie4.nl:6969/announce&tr=udp://eddie4.nl:6969&tr=http://open.nyaatorrents.info:6544/announce&tr=udp://tracker.openbittorrent.com:80/announce&tr=udp://tracker.openbittorrent.com:80&tr=udp://tracker.internetwarriors.net:1337&tr=udp://tracker.internetwarriors.net:1337/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://exodus.desync.com:6969/announce" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">DOKS-566</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:DOKS-566
+
+<p>委行日期:2022-08-01
+
+<p>畤艮:130 m
+
+<p>遵演:助平才么义
+
+<p>片商:OFFICE K'S
+
+<p>系列:美少女僵等生评分:★★★★ 74.03分,由228人评價
+            </div>
+            <a href="magnet:?xt=urn:btih:a5387b329fb865633336f5b0e6b31e857b3bdfe3&dn=[javdb.com]DOKS-566-C.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">APAA-397</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:APAA-397
+
+<p>委行日期:2022-11-22
+
+<p>畤畏:168m
+
+<p>遵演:葵刀榭
+
+<p>片商: Aurora Project Annex
+
+<p>系列:御哼”t义勺
+
+<p>评分:★★★★★4.14分,由41人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:3ecfd654d0fa59ccfb4974a9bc31d713ac299a61&dn=[javdb.com]apaa-397.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">APNS-301</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:APNS-301
+
+<p>张行日期:2022-11-22
+
+<p>畤畏:115 m
+
+<p>遵演:那须之浩
+
+<p>片商:Aurora Project Annex
+
+<p>系列:聊辱D家庭舫間
+
+<p>评分:★★★★★3.83分,由98人评價
+            </div>
+            <a href="magnet:?xt=urn:btih:77ecbdd175d4f767f43c78c0bfe33f670dd9a0fd&dn=[javdb.com]apns-301.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">AQSH-098</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:AQSH-098
+
+<p>登行日期:2023-05-17
+
+<p>畤艮: 120 m
+
+<p>片商:了勺了毛一儿/HERO
+
+<p>呼分:★★★★★4.34分,由121人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:88af58ff706195bab0813abd50680df1fd9da7c1&dn=[javdb.com]aqsh-098.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SONE-028</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:SONE-028
+
+<p>登行日期:2024-01-23
+
+<p>畤辰:140 m
+
+<p>遵演:TAKE-D
+
+<p>片商:S1 NO.1 STYLE
+
+<p>部分:★★★★★4.37分,由1106人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:70e996febf3232d0561bb134357029a53d9924e2&dn=[javdb.com]sone-028-4k.torrent" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">TYSF-029</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                番虢:TYSF-029
+
+<p>登行日期:2022-11-09
+
+<p>畤艮:150m
+
+<p>遵演:川尻片商: ROYAL
+
+<p>系列:不十儿工又
+
+<p>评分:★★★★★4.3分,由376人部價
+            </div>
+            <a href="magnet:?xt=urn:btih:a4e701d3e38b347057279b299b048c9d08e28856&dn=[javdb.com]TYSF-029" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-951</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                【AI修复无码超清】
+<p>河北彩花2023-11-24
+<p>《出差和美乳女上司
+<p>同房被她硬上抽插整夜》
+<p>SSIS-951女优:
+<p>#河北彩花#中文字幕
+<p>#毒龙#口交#做爱
+<p>#中出#内射#口爆
+<p>#打飞机
+            </div>
+            <a href="magnet:?xt=urn:btih:0444672685d56198b7c71cadac6e83811555aa5c&dn=[javdb.com]SSIS-951-UC.torrent.%E6%97%A0%E7%A0%81%E7%A0%B4%E8%A7%A3" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">4017-PPV175-6</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="https://share.feijipan.com/s/ecBFK2br" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FC2 PPV 2711719</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="https://share.feijipan.com/s/PiBGUnA6" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FC2-1780072</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                
+            </div>
+            <a href="https://share.feijipan.com/s/9KBGAjzE" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">AUKG-567</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-05-13
+
+<p>番号: AUKG-567
+
+<p>标题: 姉妹レズ ～禁断の美巨乳近親レズ相姦～ 鈴木さとみ 海埜ほたる
+
+<p>女优: 铃木里美 (鈴木さとみ), 海埜ほたる
+
+<p>类型: 中文字幕, 美乳, 姐姐, 乱伦, 女同性恋, 姐妹, 高清, 独家
+
+<p>系列: 姉妹レズ（U＆K）
+
+<p>发行商: U＆K
+
+<p>导演: れんと
+
+<p>标籤: U＆K
+            </div>
+            <a href="magnet:?xt=urn:btih:3EB47EC48D8BA2AF117B45C8875066F0B9730D85&size=5362145209&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">BACJ-032</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2022-10-08
+
+<p>番号: BACJ-032
+
+<p>标题: 二度と会うことがない男だからと好き勝手精液を搾取する人妻 末広純
+
+<p>女优: 末广纯 (末広純)
+
+<p>类型: 痴女, 人妻, 不伦, 单体作品, 骑乘, 中出, 高清, 独家, 4K
+
+<p>系列: 二度と会うことがない男だからと好き勝手精液を搾取する●●
+
+<p>发行商: バルタン
+
+<p>导演: ミニマル岩村
+
+<p>标籤: BALTAN
+            </div>
+            <a href="magnet:?xt=urn:btih:6E20F79B3FF10360FF75E95E7CA6310CEBDFB1BF&size=1983278191&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">FSDSS-721</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2024-01-27
+
+<p>番号: FSDSS-721-CHINESE-SUBTITLE
+
+<p>标题: 隣のゴミ部屋に住む性欲化け物老人に軟禁され逃げもせず強制中出しされ続けた私 藤井蘭々 14,500 89
+
+<p>女优: 藤井兰々 (藤井蘭々)
+
+<p>类型: 中文字幕
+
+<p>标籤: FSDSS
+            </div>
+            <a href="magnet:?xt=urn:btih:15A9042A66CDB2F2F19731668A01D4A34A97A962&size=3837166497&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-859</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-05-30
+
+<p>番号: STARS-859-UNCENSORED-LEAK
+
+<p>标题: 【特典映像付き】一泊二日で12発射精しちゃうヤリまくりイチャイチャ温泉旅行 小湊よつ葉
+
+<p>女优: 小凑よつ叶 (小湊よつ葉)
+
+<p>类型: 无码流出, 和服, 单体作品, 温泉, 主观视角, 高清, 约会, 4K
+
+<p>系列: 日帰りで○発射精しちゃうヤリまくりイチャイチャ温泉旅行
+
+<p>发行商: SOD
+
+<p>导演: らくだ
+
+<p>标籤: SOD star
+            </div>
+            <a href="magnet:?xt=urn:btih:EC03F1A94A3F3B56BA8DCF55EBDF651F7FEAE8FF" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">BEFG-008</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2022-07-23
+
+<p>番号: BEFG-008
+
+<p>标题: 小悪魔女王蹂躙地獄 サディスティック美少女vs暴虐のヤカラ 東條なつ
+
+<p>女优: 东条夏 (東條なつ)
+
+<p>类型: 中文字幕, 羞耻, 女高中生, 单体作品, 捆绑, 拷问, 高清, 独家, 极限高潮
+
+<p>系列: 小悪魔女王蹂躙地獄
+
+<p>发行商: BabyEntertainment
+
+<p>导演: キクボン
+
+<p>标籤: GOLDEN BABE
+            </div>
+            <a href="magnet:?xt=urn:btih:7395C279B5041C2A69594DE65A9C56BD55AFDB64&size=6479000090&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">BF-678</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2022-12-02
+
+<p>番号: BF-678
+
+<p>标题: 妻がいるのに生徒の誘惑に勝てず放課後ラブホでめちゃくちゃ中出ししてしまった。 広瀬ひな
+
+<p>女优: 广瀬ひな (広瀬ひな)
+
+<p>男优: 蓝井优太
+
+<p>类型: 中文字幕, 制服, 女高中生, 痴女, 单体作品, 中出, 高清, 独家
+
+<p>发行商: BeFree
+
+<p>导演: ロクヨン
+
+<p>标籤: BeFree
+            </div>
+            <a href="magnet:?xt=urn:btih:EFCA9429D626E5EB84FCFE42CBF1D353EBEC25D9&size=6745644684&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">PPPE-070</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2022-08-12
+
+<p>番号: PPPE-070
+
+<p>标题: ゴミ屋敷痴女に逆監禁されて48発中出し逆レ×プで犯●れ続けた3日間 辻井ほのか 桃瀬くるみ
+
+<p>女优: 辻井穗乃果 (辻井ほのか), 桃瀬くるみ
+
+<p>男优: 结城结弦
+
+<p>类型: 中文字幕, 痴女, 巨乳, 中出, 后宫, 婊子, 高清, 独家
+
+<p>发行商: OPPAI
+
+<p>标籤: OPPA
+            </div>
+            <a href="magnet:?xt=urn:btih:F8CA0B317EE8442E3B6F0D97D77ECC7694BC1E88&size=6804599472&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">PPPE-080</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2022-10-14
+
+<p>番号: PPPE-080
+
+<p>标题: はじめて彼女ができたのに！年下の女上司に痴女られ残業と営業と出張が増えた僕 楪カレン
+
+<p>女优: 楪可怜 (楪カレン)
+
+<p>男优: アベ
+
+<p>类型: 中文字幕, 巨乳, 单体作品, NTR, 中出, 乳交, 高清, 独家, 女上司
+
+<p>发行商: OPPAI
+
+<p>标籤: OPPAI
+            </div>
+            <a href="magnet:?xt=urn:btih:F45C2C9596B36FF539880D8A0B64C8E7CC14FBBB&size=5346834016&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-967</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-12-26
+
+<p>番号: STARS-967-CHINESE-SUBTITLE
+
+<p>标题: 同僚との不倫が生徒にバレ性処理玩具にされた新米女教師 十束るう
+
+<p>女优: 十束るう
+
+<p>类型: 中文字幕, 羞辱, 女教师, 不伦, 单体作品, 剧情, 多人运动, 高清
+
+<p>发行商: SOD
+
+<p>导演: 前田文豪
+
+<p>标籤: SOD star
+            </div>
+            <a href="magnet:?xt=urn:btih:A68BA42A52B1606B8C463533E379E05E2B25719D&size=4285553180&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">DASS-240</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-06
+
+<p>番号: DASS-240-UNCENSORED-LEAK
+
+<p>标题: 逃亡者 <p>かくまって貰う為に元カレ達の家に突然上がり<p>込み押し付けすっぽん中出し性交する特殊詐欺犯 新井リマ
+
+<p>女优: 新井リマ
+
+<p>男优: タイ, Qべぇ
+
+<p>类型: 无码流出, 美少女, 痴女, 巨乳, 单体作品, 中出, 手淫, 高清, 独家
+
+<p>发行商: Das
+
+<p>导演: ZAMPA
+
+<p>标籤: ダスッ！
+            </div>
+            <a href="magnet:?xt=urn:btih:08F39C627C03B4F7CB3FF632A09EA02CF6D24B93&size=7078277947&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">GVH-588</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-07
+
+<p>番号: GVH-588
+
+<p>标题: 【暴発体験談】妹の友人・えりかさんのエステ研修（ブラジリアンワックス）で、風俗ではない真っ当なエステにも関らず、早漏敏感な私はうっかり勃起してことごとくお漏らしルーインド射精してしまった話をご紹介。 尾崎えりか
+
+<p>女优: 尾崎えりか
+
+<p>类型: 痴女, 单体作品, 淫乱, 回春按摩, 中出, 手淫, 独家
+
+<p>发行商: Glory Quest
+
+<p>导演: 春花幸男
+
+<p>标籤: GLORY QUEST
+            </div>
+            <a href="magnet:?xt=urn:btih:83670BB594A2BE88820807AB6C54D9F227BEAFD0&size=7262932790&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIAA-966</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-09-29
+
+<p>番号: MIAA-966-UNCENSORED-LEAK
+
+<p>标题: 超高級中出し専門ソープ 天川そら
+
+<p>女优: 天川空 (天川そら)
+
+<p>类型: 无码流出, 美乳, 风俗娘, 内衣, 单体作品, 中出, 按摩油, 高清, 独家
+
+<p>系列: 超高級中出し専門ソープ
+
+<p>发行商: Moody's
+
+<p>导演: ザック荒井
+
+<p>标籤: みんなのキカタン
+            </div>
+            <a href="magnet:?xt=urn:btih:EEC708E89AC207A0145B2C51CC5C7B76E85B9801&size=7432178398&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">NHDTB-847</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-12-12
+
+<p>番号: NHDTB-847
+
+<p>标题: 連射痴● ちっちゃい女の子に精子が尽きるまで何発も射精したい
+
+<p>类型: 女高中生, 小只马, 校服, 颜射, 高清
+
+<p>系列: 連射痴●
+
+<p>发行商: NATURAL HIGH
+
+<p>导演: 櫻井バニラ
+
+<p>标籤: CHIKAN
+            </div>
+            <a href="magnet:?xt=urn:btih:4A6BF3DE7BD9B9EF77F30AE5E38DB30F972AF694&size=6502112180&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-875</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-09-22
+
+<p>番号: SSIS-875
+
+<p>标题: 河北彩花の完全プライベートセックス全部撮った！ 圧倒的に支持される新時代トップ女優と朝まで2人きりの生々ハメ撮りFUCK
+
+<p>女优: 河北彩花
+
+<p>男优: 贞松大辅
+
+<p>类型: 苗条, 纪录片, 单体作品, 口交, 自拍, 高清, 独家
+
+<p>系列: 朝まで2人きりの生々ハメ撮りFUCK
+
+<p>发行商: S1
+
+<p>导演: 嵐山みちる
+
+<p>标籤: S1 NO.1 STYLE
+            </div>
+            <a href="magnet:?xt=urn:btih:FA3CAF34428CA2B3C07DC6FC48BB4E821F68690E&size=8597112086&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-884</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-09-22
+
+<p>番号: SSIS-884
+
+<p>标题: ドエロイお姉さんの囁き淫語と超絶しつこ～い焦らし寸止めでねっとりじっくり舐め回されるルーインドメンズエステ 河西れおな
+
+<p>女优: 河西れおな
+
+<p>男优: 羽田, 梅田吉雄
+
+<p>类型: 痴女, 巨乳, 苗条, 单体作品, 回春按摩, 手淫, 高清, 独家, 4K
+
+<p>发行商: S1
+
+<p>导演: トレンディ山口
+
+<p>标籤: S1 NO.1 STYLE
+            </div>
+            <a href="magnet:?xt=urn:btih:5228942D1B8E588DB7FD6CD90315C6FE29B11DC5&size=9044707936&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">STARS-923</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-11
+
+<p>番号: STARS-923
+
+<p>标题: 超絶スタイル神木麗の「美尻」を堪能する5シチュエーション 私、実は…おっぱいだけじゃなくておしりもスゴいんです。 神木麗
+
+<p>女优: 神木丽 (神木麗)
+
+<p>类型: 中文字幕
+
+<p>发行商: SOD
+
+<p>导演: 坂井シベリア
+
+<p>标籤: SODstar
+            </div>
+            <a href="magnet:?xt=urn:btih:58061770685FE475354218BCE63EAB232AD68C5F&size=7415926815&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">WAAA-300</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-09-29
+
+<p>番号: WAAA-300
+
+<p>标题: 新井リマの凄テクを我慢できれば生★中出しSEX！
+
+<p>女优: 新井リマ
+
+<p>类型: 美少女, 痴女, 单体作品, 感谢祭, 中出, 口交, 高清, 独家
+
+<p>系列: 我慢できれば生中出しSEX！
+
+<p>发行商: Wanz Factory
+
+<p>标籤: WANZ
+            </div>
+            <a href="magnet:?xt=urn:btih:23B2C96825CEB41CAAEFAE80D1C3685B257810EB&size=9609096103&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">WAAA-304</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-09-29
+
+<p>番号: WAAA-304
+
+<p>标题: 鉄フック マ○コ引き裂き失禁拷問 BAR店長 イキ狂いダダ漏らし恥獄！！ AIKA
+
+<p>女优: AIKA
+
+<p>男优: ピエール剑, 矢野慎二
+
+<p>类型: 单体作品, 中出, 放尿, 潮吹, 高清, 独家
+
+<p>系列: 鉄フックマ○コ引き裂き失禁拷問
+
+<p>发行商: Wanz Factory
+
+<p>标籤: WANZ
+            </div>
+            <a href="magnet:?xt=urn:btih:4F983004323ACB5B4AC2125881EEBC108EEF9D2B&size=6373842404&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">ABF-039</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2012-08-29
+
+<p>番号: ABF-039
+
+<p>标题: フェラチオ158連発 かわいい子だけ!フェラチオの館
+
+<p>类型: 痴女, 泳装, 恋物癖, 4小时以上
+
+<p>发行商: 映天
+
+<p>标籤: KYおやじ協同組合
+            </div>
+            <a href="magnet:?xt=urn:btih:828C68812DDC85C00C70739078F5EAF2D446A9F8&size=8649575594&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MEYD-853</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-27
+
+<p>番号: MEYD-853
+
+<p>标题: 新人 35歳になっても「ブレない女。」美とSEXにストイックな元モデル人妻AV DEBUT 夢野すみれ
+
+<p>女优: 梦野すみれ (夢野すみれ)
+
+<p>类型: 熟女, 人妻, 巨乳, 单体作品, 多人运动, 出道作, 高清, 独家, 4K
+
+<p>发行商: 溜池ゴロー
+
+<p>导演: 豆沢豆太郎
+
+<p>标籤: 溜池ゴロー
+            </div>
+            <a href="magnet:?xt=urn:btih:ED10EFC06999F106383BC425560A617183A6BF13&size=8432668053&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">HMN-474</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-27
+
+<p>番号: HMN-474
+
+<p>标题: 苛めっこの息子の友達を自宅エステサロンに呼び出して 超絶品BODYママのパイズリ＆膣圧施術でチ●ポびんびん状態で中出し謝罪させる！！ JULIA
+
+<p>女优: JULIA
+
+<p>类型: 中文字幕, 痴女, 人妻, 巨乳, 单体作品, 中出, 乳交, 高清, 独家
+
+<p>发行商: 本中
+
+<p>导演: トレンディ山口
+
+<p>标籤: 本中
+            </div>
+            <a href="magnet:?xt=urn:btih:83E9C03D5D7FDF935FC64AAAC23B639C878F3BEC&size=6408012511&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-913</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-20
+
+<p>番号: SSIS-913
+
+<p>标题: 人生初 男8人と10時間ぶっ通しノンストップ性交 河北彩花
+
+<p>女优: 河北彩花
+
+<p>男优: マッスル泽野, 阿部智广, 吉村卓, 贞松大辅, しみけん, 鲛岛, TECH
+
+<p>类型: 中文字幕, 苗条, 单体作品, 骑乘, 潮吹, 高清, 独家, 极限高潮, 4K
+
+<p>发行商: S1
+
+<p>导演: 紋℃
+
+<p>标籤: S1 NO.1 STYLE
+            </div>
+            <a href="magnet:?xt=urn:btih:E3B65FDC9190F3D7F698037E17CD7ACA72FDAD76&size=8217691940&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIDV-618</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2024-02-02
+
+<p>番号: MIDV-618
+
+<p>标题: 涎とろっとろ ビンカン美少女と濃厚オヤジのベロチューフルコース 一心えりか
+
+<p>女优: 一心えりか
+
+<p>类型: 制服, 美少女, 巨乳, 单体作品, 接吻, 多人运动, 高清, 独家, 4K
+
+<p>系列: ビンカン美少女と濃厚オヤジのベロチューフルコース
+
+<p>发行商: Moody's
+
+<p>导演: 豆沢豆太郎
+
+<p>标籤: MOODYZ DIVA
+            </div>
+            <a href="magnet:?xt=urn:btih:6D724617D41C1DD3A8F0D0F973DC7140F7BFC33C&size=5286020713&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-916</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-10-20
+
+<p>番号: SSIS-916
+
+<p>标题: お願いされたら断れない…おっぱい出して毎日ヌクの手伝ってくれる男の言いなり同級生 宇野みれい
+
+<p>女优: 宇野みれい
+
+<p>类型: 中文字幕, 羞耻, 制服, 巨乳, 单体作品, 乳交, 主观视角, 高清, 独家, 4K
+
+<p>发行商: S1
+
+<p>导演: TAKE-D
+
+<p>标籤: S1 NO.1 STYLE
+            </div>
+            <a href="magnet:?xt=urn:btih:F96A9397B8EAB5BD0E7E4B7B101C996AF559ABD2&size=6268173653&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">MIAA-317</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2020-09-12
+
+<p>番号: MIAA-317
+
+<p>标题: W女捜査官の誘惑尋問 容疑が晴れるまで杭打ち中出し拷問され続けた身柄拘束三日間 蓮実クレア 倉多まお
+
+<p>女优: 仓多真央 (倉多まお), 莲实克蕾雅 (蓮実クレア)
+
+<p>男优: 羽田
+
+<p>类型: 痴女, 苗条, 女搜查官, 骑乘, 中出, 薄格, 高清, 独家
+
+<p>发行商: Moody's
+
+<p>导演: トレンディ山口
+
+<p>标籤: みんなのキカタン
+            </div>
+            <a href="magnet:?xt=urn:btih:D892175FB67A5DCB8A7C30C166797A50CF29DF9B&size=7726475447&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">JUQ-003</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2022-06-24
+
+<p>番号: JUQ-003
+
+<p>标题: 取引先の傲慢社長に中出しされ続けた出張接待。 電撃専属、イイ女のスーツ『美』―。 有賀みなほ
+
+<p>女优: 有贺みなほ (有賀みなほ)
+
+<p>男优: 小泽とおる
+
+<p>类型: 熟女, 人妻, 巨乳, 单体作品, 中出, 薄格, 高清, 独家, 商务服装
+
+<p>系列: 取引先の傲慢社長に中出しされ続けた出張接待。
+
+<p>发行商: Madonna
+
+<p>导演: ユニコーン福田
+
+<p>标籤: Madonna
+            </div>
+            <a href="magnet:?xt=urn:btih:EEC40E4F7A47BE27FBA306FCD8063DCE5FDAEE46&size=6962577200&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">DASS-158</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-05-19
+
+<p>番号: DASS-158
+
+<p>标题: 綺麗だと憧れていた友達のお母さんとマッチングアプリで再会。緊張の糸が切れた二人は、理性を捨てて本能のまま交じり合った。 森沢かな
+
+<p>女优: 森泽佳奈 (饭冈佳奈子) (森沢かな（飯岡かなこ）)
+
+<p>类型: 熟女, 痴女, 人妻, 单体作品, 中出, 高清, 独家
+
+<p>发行商: Das
+
+<p>导演: 三島六三郎
+
+<p>标籤: ダスッ！
+            </div>
+            <a href="magnet:?xt=urn:btih:7E39E3950C2A4172A630FDFA0FBEE44D372C58EA&size=6415450029&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SSIS-852</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2023-07-21
+
+<p>番号: SSIS-852
+
+<p>标题: 専属 NO.1STYLE 本郷愛エスワンデビュー 新章
+
+<p>女优: 二阶堂梦 (二階堂夢)
+
+<p>类型: 中文字幕, 巨乳, 单体作品, 淫乱, 接吻, 骑乘, 潮吹, 出道作, 超薄格, 高清, 独家, 4K
+
+<p>系列: 専属NO.1 STYLE
+
+<p>发行商: S1
+
+<p>导演: 紋℃
+
+<p>标籤: S1 NO.1 STYLE
+            </div>
+            <a href="magnet:?xt=urn:btih:DF7F755C853EAF6564DB34482C4D675F1219343A&size=9111819508&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-category"></div>
+    <div class="card-title">SAME-095</div>
+    <div class="card-content">
+        <div class="download-section">
+            <div class="card-info">
+                发行日期: 2024-02-02
+
+<p>番号: SAME-095
+
+<p>标题: 上京まもない女子社員は、やがて激しく犯●れる。 工藤ゆら
+
+<p>女优: 工藤ゆら
+
+<p>类型: 羞辱, OL, 单体作品, 剧情, 高清, 独家
+
+<p>系列: 上京まもない○○は、やがて激しく犯●れる。
+
+<p>发行商: Attackers
+
+<p>导演: 大谷卓生
+
+<p>标籤: 死夜悪
+            </div>
+            <a href="magnet:?xt=urn:btih:DA2500D6AE95FD60D20C67F1B8E8B987E661ADDB&size=6167067808&biz=ktr" class="download-btn">下载</a>
+        </div>
+    </div>
+        
+            </article>
+    </main>
+
+    <button class="floating-button floating-refresh" onclick="refreshPage()" aria-label="刷新页面">↻</button>
+<button class="floating-button floating-top" onclick="scrollToTop()" aria-label="返回顶部">↑</button>
+
+    <script>
+// 防抖函数
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// 搜索功能实现
+const performSearch = debounce(() => {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        const appName = card.querySelector('.app-name')?.textContent.toLowerCase() || '';
+        const cardInfo = card.querySelector('.card-info')?.textContent.toLowerCase() || '';
+        const isVisible = appName.includes(searchTerm) || cardInfo.includes(searchTerm);
+        
+        if (isVisible) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}, 300);
+
+// 添加搜索框回车事件监听
+document.getElementById('searchInput').addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        performSearch();
+    }
+});
+
+</script>
+
+<script>
+// 添加搜索按钮点击事件监听
+document.querySelector('.search-bar button').addEventListener('click', performSearch);
+</script>
+
+<script>
+
+        // 添加图片加载失败处理
+        document.querySelectorAll('.app-icon').forEach(img => {
+            img.onerror = function() {
+                this.src = 'placeholder.png'; // 设置默认图片
+                this.alt = '图片加载失败';
+            };
+        });
+
+        // 添加页面加载完成后的优化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 预加载图片
+            const images = document.querySelectorAll('.app-icon');
+            images.forEach(img => {
+                const preloadLink = document.createElement('link');
+                preloadLink.rel = 'preload';
+                preloadLink.as = 'image';
+                preloadLink.href = img.src;
+                document.head.appendChild(preloadLink);
+            });
+        });
+        
+        function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const body = document.body;
+    
+    sidebar.classList.toggle('active');
+    
+    if (sidebar.classList.contains('active')) {
+        sidebarOverlay.style.display = 'block';
+        body.style.overflow = 'hidden'; // 防止背景滚动
+        
+        // 添加触摸滑动关闭支持
+        let startX = 0;
+        let currentX = 0;
+        
+        function handleTouchStart(e) {
+            startX = e.touches[0].clientX;
+        }
+        
+        function handleTouchMove(e) {
+            currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            
+            if (diff < 0) {
+                sidebar.style.transform = `translateX(${diff}px)`;
+            }
+        }
+        
+        function handleTouchEnd() {
+            const diff = currentX - startX;
+            if (diff < -50) { // 如果滑动距离超过50px
+                toggleSidebar();
+            }
+            sidebar.style.transform = '';
+        }
+        
+        sidebar.addEventListener('touchstart', handleTouchStart);
+        sidebar.addEventListener('touchmove', handleTouchMove);
+        sidebar.addEventListener('touchend', handleTouchEnd);
+        
+    } else {
+        sidebarOverlay.style.display = 'none';
+        body.style.overflow = '';
+        
+        // 移除触摸事件监听
+        sidebar.removeEventListener('touchstart', handleTouchStart);
+        sidebar.removeEventListener('touchmove', handleTouchMove);
+        sidebar.removeEventListener('touchend', handleTouchEnd);
+    }
+}
+
+// 添加双击关闭功能
+document.getElementById('sidebar').addEventListener('dblclick', (e) => {
+    if (e.target.tagName !== 'A') { // 不是链接时才触发
+        toggleSidebar();
+    }
+});
+
+// 添加滑动手势支持
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+});
+
+document.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+    
+    // 从屏幕左边缘向右滑动打开菜单
+    if (diff > 50 && touchStartX < 30) {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar.classList.contains('active')) {
+            toggleSidebar();
+        }
+    }
+});
+    </script>
+    
+    <script>
+        function performSearch() {
+    var input = document.getElementById('searchInput');
+    var filter = input.value.toLowerCase();
+    var cardContainer = document.getElementById('cardContainer');
+    var cards = cardContainer.getElementsByClassName('card');
+
+    for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var cardTitle = card.querySelector('.card-title').textContent.toLowerCase();
+        var cardInfo = card.querySelector('.card-info').textContent.toLowerCase();
+
+        if (cardTitle.includes(filter) || cardInfo.includes(filter)) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    }
+}
+</script>
+
+<script>
+const performSearch = debounce(() => {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        const appName = card.querySelector('.app-name').textContent.toLowerCase();
+        const isVisible = appName.includes(searchTerm);
+        card.style.display = isVisible ? 'flex' : 'none';
+    });
+}, 300);
+</script>
+
+</body>
+</html>
